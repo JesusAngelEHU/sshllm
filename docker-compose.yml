@@ -8,8 +8,8 @@ services:
       - "2222:22"
     restart: always
     environment:
-      LLM_PROVIDER: "ollama"
-      LLM_SERVER_URL: "http://192.168.1.166:11434"
-      LLM_MODEL: "mistral"
+      LLM_PROVIDER: "${LLM_PROVIDER}"
+      LLM_SERVER_URL: "${LLM_SERVER_URL}"
+      LLM_MODEL: "${LLM_MODEL}"
     volumes:
       - ./log:/opt/sshllm/log
