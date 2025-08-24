@@ -5,7 +5,9 @@ WORKDIR /app
 COPY dist/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY dist/ .
+COPY . .
+
+RUN mkdir -p /opt/sshllm/log
 
 EXPOSE 22
 
