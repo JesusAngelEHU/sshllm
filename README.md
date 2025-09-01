@@ -2,7 +2,6 @@
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/JesusAngelEHU/sshllm)](https://github.com/JesusAngelEHU/sshllm)
 [![Docker Pulls](https://img.shields.io/docker/pulls/jesusangelgh/sshllm)](https://hub.docker.com/r/jesusangelgh/sshllm)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 SSHLLM es un **servidor SSH simulado** que integra un **modelo de lenguaje LLM** para generar respuestas a los comandos de usuario.  
 Ideal para **simulaciones, pruebas de seguridad y aprendizaje**.
