@@ -30,7 +30,7 @@ Session so far:
 %s
 """
 
-def handle_command(command: str, session_history: str = "", username: str = "user") -> str:
+def handle_command(command: str, session_id: str, session_history: str = "", username: str = "user") -> str:
     """
     Envía un comando al LLM y devuelve la salida simulada del shell.
     - command: el comando ejecutado por el atacante
@@ -73,7 +73,7 @@ sshd:*:18753:0:99999:7:::
     full_prompt = system_prompt + "\n\n" + user_prompt
 
     try:
-        response = query_llm(full_prompt)
+        response = query_llm(full_prompt,session_id)
         return response.strip() 
     except Exception as e:
         return f"Error simulating command: {e}"

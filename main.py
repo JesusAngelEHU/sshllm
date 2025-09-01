@@ -14,11 +14,20 @@ class SSHHandler(paramiko.ServerInterface):
         self.session_history = ""
         self.username = "user"
         self.session_id = session_id
+        self.auth_attempts = 0  # contador de intentos
 
     def check_auth_password(self, username, password):
-        log_auth(self.session_id, username, password, True)
-        self.username = username
-        return paramiko.AUTH_SUCCESSFUL
+        self.auth_attempts += 1
+
+        if self.auth_attempts < 3:
+            # Rechaza los 2 primeros intentos
+            log_auth(self.session_id, username, password, False)
+            return paramiko.AUTH_FAILED
+        else:
+            # En el 3er intento (o más), lo acepta
+            log_auth(self.session_id, username, password, True)
+            self.username = username
+            return paramiko.AUTH_SUCCESSFUL
 
     def check_channel_request(self, kind, chanid):
         if kind == "session":
@@ -102,7 +111,7 @@ def handle_client(client, addr):
                         log_command(session_id, cmd.strip())
 
                         try:
-                            response = handle_command(cmd, server.session_history, server.username)
+                            response = handle_command(cmd,session_id, server.session_history, server.username)
                         except Exception as e:
                             response = f"bash: {cmd.strip()}: command failed ({e})"
 

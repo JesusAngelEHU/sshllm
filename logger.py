@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+import sys
 from datetime import datetime
 
 LOG_DIR = "/opt/sshllm/log"
@@ -9,9 +10,15 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def _write_log(event: dict):
-    """Escribe evento JSON en el log"""
+    """Escribe evento JSON en el fichero y en stdout"""
+    line = json.dumps(event)
+
+    # → Persistir en fichero
     with open(LOG_FILE, "a") as f:
-        f.write(json.dumps(event) + "\n")
+        f.write(line + "\n")
+
+    # → Imprimir en stdout (docker logs)
+    print(line, file=sys.stdout, flush=True)
 
 
 def new_session(src_ip: str, src_port: int, dst_ip: str, dst_port: int) -> str:
@@ -64,6 +71,18 @@ def log_disconnect(session_id: str):
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "session": session_id,
     }
+    _write_log(event)
+
+def log_error(session_id: str = None, error: str = "", context: dict = None):
+    """Loggea errores del honeypot o del LLM"""
+    event = {
+        "eventid": "sshllm.error",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "session": session_id,
+        "error": error,
+    }
+    if context:
+        event["context"] = context
     _write_log(event)
 
 
