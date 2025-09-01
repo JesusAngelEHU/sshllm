@@ -29,17 +29,22 @@ docker build -t sshllm .
 docker compose up -d
 Ajusta el puerto y variables de entorno según tu entorno.
 
+---
+
 ### 🚀 Conexion con el servidor SSH simulado:
 
 ssh user@localhost -p 2222
 
 Los comandos se procesan mediante un LLM y se registran en logs internos.
 
+---
+
 ### ⚙️ Variables de entorno
 LLM_SERVER_URL: URL del servidor LLM.
 
 LLM_MODEL: Nombre del modelo de lenguaje a usar.
 
+---
 
 ### 📄 Logs
 Integrados con ELK stack, registran:
