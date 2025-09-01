@@ -11,9 +11,9 @@ Ideal para **simulaciones, pruebas de seguridad y aprendizaje**.
 ## ✨ Características
 
 - Shell interactivo simulado con historial de comandos y soporte ANSI.
-- Respuestas generadas por LLM (por defecto `Mistral`).
+- Respuestas generadas por LLM.
 - Registro completo de sesiones, comandos y desconexiones.
-- Manejo de errores del LLM de forma segura (solo logs internos, usuario no ve fallos).
+- Manejo de errores del LLM de forma segura.
 - Soporte multiusuario simulado y autenticación SSH realista.
 
 ---
