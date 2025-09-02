@@ -51,21 +51,38 @@ def sanitize_output(output: str) -> str:
 
 def handle_client(client, addr):
     session_id = str(uuid.uuid4())
-    server = SSHHandler(session_id)
+    try:    
+        server = SSHHandler(session_id)
 
-    transport = paramiko.Transport(client)
-    transport.add_server_key(HOST_KEY)
-    transport.start_server(server=server)
+        transport = paramiko.Transport(client)
+        transport.add_server_key(HOST_KEY)
+        transport.start_server(server=server)
 
-    chan = transport.accept(20)
-    if chan is None:
-        client.close()
+        chan = transport.accept(20)
+        if chan is None:
+            client.close()
         return
-    local_ip, local_port = client.getsockname()
+        local_ip, local_port = client.getsockname()
 
 
-    # Log de nueva sesión con IP y puerto remoto
-    new_session(session_id, addr[0], addr[1],local_port)
+        # Log de nueva sesión con IP y puerto remoto
+        new_session(session_id, addr[0], addr[1],local_port)
+        
+    except (paramiko.SSHException, EOFError, ConnectionResetError) as e:
+        log_error(
+            session_id=session_id,
+            error="SSH handshake aborted",
+            context={"src_ip": addr[0], "src_port": addr[1], "reason": str(e)},
+        )
+        client.close()
+
+    except Exception as e:
+        log_error(
+            session_id=session_id,
+            error="Unexpected error in handle_client",
+            context={"src_ip": addr[0], "src_port": addr[1], "reason": str(e)},
+        )
+        client.close()
 
     prompt = lambda: f"{server.username}@sshllm:~$ "
 

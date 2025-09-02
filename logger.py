@@ -13,11 +13,11 @@ def _write_log(event: dict):
     """Escribe evento JSON en el fichero y en stdout"""
     line = json.dumps(event)
 
-    # → Persistir en fichero
+    # Escribir en fichero
     with open(LOG_FILE, "a") as f:
         f.write(line + "\n")
 
-    # → Imprimir en stdout (docker logs)
+    #Imprimir en stdout (docker logs)
     print(line, file=sys.stdout, flush=True)
 
 
