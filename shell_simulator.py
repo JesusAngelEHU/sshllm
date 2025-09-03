@@ -4,7 +4,7 @@ from llm_client import query_llm
 
 # 🔹 Prompt del sistema
 system_prompt = """
-You are emulating a Linux SSH shell for an attacker connected to a honeypot.
+You are emulating a Linux SSH shell.
 
 Guidelines:
 - Format the response as plain text (NO JSON).
@@ -34,6 +34,7 @@ def handle_command(command: str, session_id: str, session_history: str = "", use
     """
     Envía un comando al LLM y devuelve la salida simulada del shell.
     - command: el comando ejecutado por el atacante
+    - session_id: id de la session de la conexion 
     - session_history: historial de comandos/respuestas anteriores
     - username: usuario con el que se conectó
     """
