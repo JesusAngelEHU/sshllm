@@ -2,7 +2,9 @@ import socket
 import threading
 import paramiko
 import uuid
-from logger import new_session, log_auth, log_command, log_disconnect
+import logging
+logging.getLogger("paramiko").setLevel(logging.CRITICAL)
+from logger import new_session, log_auth, log_command, log_disconnect, log_error
 from shell_simulator import handle_command
 
 HOST_KEY = paramiko.RSAKey.generate(2048)
@@ -50,9 +52,11 @@ def sanitize_output(output: str) -> str:
 
 
 def handle_client(client, addr):
+    #Sesion ssh
     session_id = str(uuid.uuid4())
+    server = SSHHandler(session_id)
+
     try:    
-        server = SSHHandler(session_id)
 
         transport = paramiko.Transport(client)
         transport.add_server_key(HOST_KEY)
@@ -60,50 +64,37 @@ def handle_client(client, addr):
 
         chan = transport.accept(20)
         if chan is None:
+            log_error(
+                session_id=session_id,
+                error="SSH channel not established",
+                context={"src_ip": addr[0], "src_port": addr[1]},
+            )
             client.close()
-        return
+            return
+
         local_ip, local_port = client.getsockname()
-
-
-        # Log de nueva sesión con IP y puerto remoto
         new_session(session_id, addr[0], addr[1],local_port)
-        
-    except (paramiko.SSHException, EOFError, ConnectionResetError) as e:
-        log_error(
-            session_id=session_id,
-            error="SSH handshake aborted",
-            context={"src_ip": addr[0], "src_port": addr[1], "reason": str(e)},
-        )
-        client.close()
 
-    except Exception as e:
-        log_error(
-            session_id=session_id,
-            error="Unexpected error in handle_client",
-            context={"src_ip": addr[0], "src_port": addr[1], "reason": str(e)},
-        )
-        client.close()
+        #Shell llm
+        prompt = lambda: f"{server.username}@sshllm:~$ "
 
-    prompt = lambda: f"{server.username}@sshllm:~$ "
+        def clear_line():
+            chan.send("\r\x1b[2K")
 
-    def clear_line():
-        chan.send("\r\x1b[2K")
+        def render_line():
+            clear_line()
+            chan.send(prompt() + buffer)
+            if cursor < len(buffer):
+                chan.send(f"\x1b[{len(buffer)-cursor}D")
 
-    def render_line():
-        clear_line()
-        chan.send(prompt() + buffer)
-        if cursor < len(buffer):
-            chan.send(f"\x1b[{len(buffer)-cursor}D")
+        chan.send(f"Welcome\r\n{prompt()}")
 
-    chan.send(f"Welcome\r\n{prompt()}")
+        buffer = ""
+        cursor = 0
+        history = []
+        history_index = -1
+        temp_buffer = ""
 
-    buffer = ""
-    cursor = 0
-    history = []
-    history_index = -1
-    temp_buffer = ""
-
-    try:
         while True:
             data = chan.recv(1024).decode(errors="ignore")
             if not data:
@@ -234,6 +225,18 @@ def handle_client(client, addr):
                     render_line()
 
                 i += 1
+    except (paramiko.SSHException, EOFError, ConnectionResetError) as e:
+        log_error(
+            session_id=session_id,
+            error="SSH handshake aborted",
+            context={"src_ip": addr[0], "src_port": addr[1], "reason": str(e)},
+        )
+    except Exception as e:
+        log_error(
+            session_id=session_id,
+            error="Unexpected error in handle_client",
+            context={"src_ip": addr[0], "src_port": addr[1], "reason": str(e)},
+        )
     finally:
         try:
             log_disconnect(session_id)

@@ -2,7 +2,7 @@
 
 from llm_client import query_llm
 
-# 🔹 Prompt del sistema
+# Prompt del sistema
 system_prompt = """
 You are emulating a Linux SSH shell.
 
@@ -18,7 +18,7 @@ Guidelines:
 - Always stay in character as a server, never as an assistant.
 """
 
-# 🔹 Plantilla para el prompt de usuario
+# Prompt de usuario
 user_prompt_template = """
 No talk, Dont add context; Just do. Respond to the following SSH command:
 
