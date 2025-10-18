@@ -4,13 +4,11 @@ import os
 
 _sessions = {}  # Diccionario global: session_id -> estado
 
-def get_state(session_id):
+def get_state(session_id, username):
     if session_id not in _sessions:
         _sessions[session_id] = {
-            "cwd": "/home/user",
+            "cwd": f"/home/{username}",
             "files": {
-                "/home/user/readme.txt": "This is a honeypot file.\n",
-                "/etc/passwd": "root:x:0:0:root:/root:/bin/bash\nuser:x:1000:1000:user:/home/user:/bin/bash\n",
             },
             "processes": [],
         }

@@ -21,11 +21,10 @@ def _write_log(event: dict):
     print(line, file=sys.stdout, flush=True)
 
 
-def new_session(src_ip: str, src_port: int, dst_ip: str, dst_port: int) -> str:
+def new_session(session_id:str ,src_ip: str, src_port: int, dst_ip: str, dst_port: int) :
     """
-    Crea un nuevo session_id estilo Cowrie y loggea conexión.
+    Loggea nueva sesion.
     """
-    session_id = uuid.uuid4().hex
     event = {
         "eventid": "sshllm.session.connect",
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -37,7 +36,6 @@ def new_session(src_ip: str, src_port: int, dst_ip: str, dst_port: int) -> str:
         "system": "sshllm",
     }
     _write_log(event)
-    return session_id
 
 
 def log_auth(session_id: str, username: str, password: str, success: bool):
@@ -84,5 +82,18 @@ def log_error(session_id: str = None, error: str = "", context: dict = None):
     if context:
         event["context"] = context
     _write_log(event)
+
+def log_event(session_id: str = None, event: str = "", context: dict = None):
+    """Loggea evento del honeypot o del LLM"""
+    event = {
+        "eventid": "sshllm.event",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "session": session_id,
+        "event": event,
+    }
+    if context:
+        event["context"] = context
+    _write_log(event)
+
 
 
