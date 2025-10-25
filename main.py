@@ -1,6 +1,6 @@
 import asyncio, asyncssh, uuid
 from logger import new_session, log_auth, log_command, log_disconnect, log_error, log_event
-from llmd_client import query_llm
+from llm_client import query_llm
 
 async def handle_client(process: asyncssh.SSHServerProcess) -> None:
     session_id = str(uuid.uuid4())
@@ -11,11 +11,11 @@ async def handle_client(process: asyncssh.SSHServerProcess) -> None:
             await process.stdout.drain()
             line = line.rstrip("\n")
             log_command(session_id,line)
-            response = query_llm(session_id,line)
+            response = query_llm(session_id,line,username)
             try: 
-                process.stdout.write(f"{response}\n{prompt}")
+                process.stdout.write(response)
             except (OSError, asyncssh.Error) as exc:
-                log_error("0","Error escribiendo en el buffer", str(exc))
+                log_error(session_id,"Error escribiendo en el buffer", str(exc))
 
 class MySSHServer(asyncssh.SSHServer):
     def connection_made(self, conn):
